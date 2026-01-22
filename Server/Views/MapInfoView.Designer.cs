@@ -494,7 +494,7 @@ namespace Server.Views
             // 
             // gridColumn13
             // 
-            gridColumn13.Caption = "可骑马";
+            gridColumn13.Caption = "允许骑马";
             gridColumn13.FieldName = "CanHorse";
             gridColumn13.Name = "gridColumn13";
             gridColumn13.Visible = true;
