@@ -27,6 +27,15 @@ namespace Server.Views
 {
     public partial class MapViewer : DevExpress.XtraBars.Ribbon.RibbonForm
     {
+        // 新手说明：
+        // - 本类负责在一个独立窗口中以 DirectX 渲染并编辑地图区域（MapRegion）或显示整张地图（MapPath）。
+        // - 结构上：上半部分是 MapViewer 窗体逻辑（事件处理、UI 交互、保存/加载等）；在文件后半部分还有 DirectX 管理器和 MapControl 的实现。
+        // - 重要注意：DirectX 渲染和资源管理（如 Device、Surface）对平台/驱动敏感，建议在 Windows 环境下运行并确保显卡驱动正常。
+        // - 若要理解地图数据如何保存/加载，关注 `MapRegion` 的 Setter、`Save()` 方法以及 `SMain.Session` 的使用。
+
+        // 常见交互：
+        // - 在其它视图中点击“编辑”会把 `MapRegion` 对象传给此窗口以编辑该区域。
+        // - 改动只存在于内存（MapRegion 对象）直到调用 `Save()` 或上层调用 `SMain.Session.Save(true)`。
         public static MapViewer CurrentViewer;
         public DXManager Manager;
         public MapControl Map;
@@ -52,6 +61,11 @@ namespace Server.Views
         public event EventHandler<EventArgs> MapRegionChanged;
         public virtual void OnMapRegionChanged(MapRegion oValue, MapRegion nValue)
         {
+            // 当 MapRegion 被设置/改变时触发。
+            // 说明（新手）：
+            // - 清理旧的选择并根据新的 MapRegion 加载地图纹理或区域点（Selection）。
+            // - 启用/禁用与区域编辑相关的按钮（例如 Save/Cancel/Attributes）。
+            // - 仅修改显示/选择状态，不自动保存到数据库；需要调用 Save() 或外部保存操作。
             Map.Selection.Clear();
             Map.TextureValid = false;
 
@@ -102,6 +116,10 @@ namespace Server.Views
         public event EventHandler<EventArgs> MapPathChanged;
         public virtual void OnMapPathChanged(string oValue, string nValue)
         {
+            // 当仅指定地图文件路径（MapPath）而不是某个区域时触发。
+            // 说明（新手）：
+            // - 该方法用于在只查看地图时重置区域编辑状态（MapRegion = null），并加载地图文件。
+            // - 与 MapRegion 不同：此时不会有可编辑的区域（Selection 为空），多数编辑按钮会被禁用。
             Map.Selection.Clear();
             Map.TextureValid = false;
             MapRegion = null;
@@ -129,6 +147,9 @@ namespace Server.Views
         {
             InitializeComponent();
 
+            // 构造函数：窗体初始化
+            // 说明（新手）：InitializeComponent() 是由 Designer 生成的方法，会创建控件与布局；
+            // 在此处设置 `CurrentViewer = this` 使得外部窗口可以访问当前打开的 MapViewer 实例。
             CurrentViewer = this;
         }
 
@@ -136,6 +157,8 @@ namespace Server.Views
         {
             base.OnClosing(e);
 
+            // 窗体关闭时清理资源
+            // 说明（新手）：需要释放 DirectX 相关资源以免占用显存或导致驱动问题。
             if (CurrentViewer == this)
                 CurrentViewer = null;
 
@@ -147,6 +170,11 @@ namespace Server.Views
         {
             base.OnLoad(e);
 
+            // 窗体加载时初始化 DirectX 管理器和 MapControl
+            // 说明（新手）：
+            // - `DXManager` 封装了 DirectX 设备/表面/精灵等资源的创建与管理。
+            // - `MapControl` 负责地图的绘制、鼠标交互、选择等逻辑。
+            // - 注册鼠标滚轮用于调整选取半径（或缩放），并更新滚动条范围以匹配渲染面板大小。
             Manager = new DXManager(DXPanel);
             Manager.Create();
             Map = new MapControl(Manager)
@@ -164,6 +192,10 @@ namespace Server.Views
         {
             base.OnSizeChanged(e);
 
+            // 窗口大小改变时需要重置 DirectX 设备并调整 MapControl 大小
+            // 说明（新手）：
+            // - ResetDevice() 会重建或调整 DirectX 设备以适配新的渲染尺寸，这是必须的以避免渲染异常。
+            // - 紧接着更新滚动条，让用户可以通过滚动查看较大地图的其他区域。
             if (Manager == null) return;
 
             Manager.ResetDevice();
@@ -175,12 +207,16 @@ namespace Server.Views
 
         public void Process()
         {
+            // 主循环调用点：更新环境状态并进行渲染。
+            // 说明（新手）：通常由外部定时器或主循环周期性调用此方法以持续刷新地图显示。
             UpdateEnvironment();
             RenderEnvironment();
         }
 
         private void UpdateEnvironment()
         {
+            // 更新显示信息（动画帧、状态栏信息等）
+            // 说明（新手）：此方法会更新动画计时器并把状态显示到工具栏（如地图大小、鼠标位置、选中格数）。
             if (SEnvir.Now > AnimationTime && Map != null)
             {
                 AnimationTime = SEnvir.Now.AddMilliseconds(100);
@@ -194,6 +230,10 @@ namespace Server.Views
 
         private void RenderEnvironment()
         {
+            // 渲染流程：清屏 -> 绘制 -> 呈现
+            // 说明（新手）：
+            // - 该方法封装了对 DirectX 设备的常规渲染步骤，并处理设备丢失/恢复场景。
+            // - 设备丢失（DeviceLost）在显卡切换、睡眠或分辨率变化时可能发生，需要 AttemptReset/AttemptRecovery 来恢复。
             try
             {
                 if (Manager.DeviceLost)
@@ -253,6 +293,7 @@ namespace Server.Views
             MapVScroll.Maximum = Math.Max(0, Map.Height - hCount + 20);
             MapHScroll.Maximum = Math.Max(0, Map.Width - wCount + 20);
 
+            // 确保滚动条的值在合法范围内，避免越界。
             if (MapVScroll.Value >= MapVScroll.Maximum)
                 MapVScroll.Value = MapVScroll.Maximum - 1;
 
@@ -262,21 +303,25 @@ namespace Server.Views
 
         private void MapVScroll_ValueChanged(object sender, EventArgs e)
         {
+            // 垂直滚动条改变：设置地图的起始 Y（顶端格子）以滚动显示内容
             Map.StartY = MapVScroll.Value;
         }
         private void MapHScroll_ValueChanged(object sender, EventArgs e)
         {
+            // 水平滚动条改变：设置地图的起始 X（左端格子）以滚动显示内容
             Map.StartX = MapHScroll.Value;
         }
 
         private void ZoomResetButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 缩放重置：恢复到 1x 缩放并刷新滚动条范围
             Map.Zoom = 1;
             UpdateScrollBars();
         }
 
         private void ZoomInButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 放大视图：每次乘 2，最大限制 4x
             Map.Zoom *= 2F;
             if (Map.Zoom > 4F)
                 Map.Zoom = 4F;
@@ -286,6 +331,7 @@ namespace Server.Views
 
         private void ZoomOutButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 缩小视图：每次除以 2，最小限制 0.01x（防止除以 0 或过小导致异常）
             Map.Zoom /= 2;
             if (Map.Zoom < 0.01F)
                 Map.Zoom = 0.01F;
@@ -295,20 +341,25 @@ namespace Server.Views
 
         private void AttributesButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 切换显示地图属性（例如阻挡/属性格），对编辑时观察不同图层有帮助
             Map.DrawAttributes = !Map.DrawAttributes;
         }
 
         private void DXPanel_MouseWheel(object sender, MouseEventArgs e)
         {
+            // 鼠标滚轮（在 DXPanel 上）：通常用来调整当前工具的半径（例如选择/刷子大小），不是缩放
+            // 说明（新手）：缩放由 ZoomIn/ZoomOut/Reset 控件控制；鼠标滚轮在此处被用作半径调整。
             Map.Radius = Math.Max(0, Map.Radius - e.Delta / SystemInformation.MouseWheelScrollDelta);
         }
         private void DXPanel_MouseDown(object sender, MouseEventArgs e)
         {
+            // 鼠标按下事件转到 MapControl，MapControl 负责处理选择/绘制起始点等行为
             Map.MouseDown(e);
         }
 
         private void DXPanel_MouseMove(object sender, MouseEventArgs e)
         {
+            // 鼠标移动事件转到 MapControl，通常用于更新鼠标位置、显示悬浮信息或动态绘制选择
             Map.MouseMove(e);
         }
 
@@ -319,26 +370,37 @@ namespace Server.Views
 
         private void DXPanel_MouseEnter(object sender, EventArgs e)
         {
+            // 鼠标进入渲染面板：通知 MapControl 进入状态（例如显示光标）
             Map.MouseEnter();
         }
 
         private void DXPanel_MouseLeave(object sender, EventArgs e)
         {
+            // 鼠标离开渲染面板：通知 MapControl 退出状态（例如隐藏光标）
             Map.MouseLeave();
         }
 
         private void SelectionButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 切换显示/隐藏选区（Selection）的绘制，便于查看或隐藏当前选择的格子
             Map.DrawSelection = !Map.DrawSelection;
         }
 
         private void SaveButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 保存当前 MapRegion 的选择到 MapRegion 对象（但不自动写入数据库）
+            // 说明（新手）：调用此方法会把 Selection 转换为 BitRegion 或 PointRegion 并写回 MapRegion 对象，
+            // 仍需在上层调用 `SMain.Session.Save(true)` 才能将更改持久化到数据库（某些视图会自动调用）。
             Save();
         }
 
         public void Save()
         {
+            // 将当前 Map.Selection 写回到 MapRegion（内存对象）中
+            // 说明（新手）：
+            // - 为了节省空间，代码会在两种存储格式之间切换：当选择点占地图很大比例时，用 BitArray（位图）表示，
+            //   否则使用 Point[] 列表表示具体坐标。
+            // - 这里只是把数据写回 MapRegion 对象，若要持久化到数据库需额外调用 `SMain.Session.Save(true)`。
             if (MapRegion == null) return;
 
             BitArray bitRegion = null;
@@ -364,6 +426,8 @@ namespace Server.Views
 
         private void CancelButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 取消更改：恢复 Selection 为 MapRegion 中原先保存的点集合
+            // 说明（新手）：如果你误改了选择区域，点击取消会从 MapRegion 的保存数据中恢复选择状态。
             if (MapRegion == null) return;
 
             Map.Selection = MapRegion.GetPoints(Map.Width);
@@ -373,6 +437,7 @@ namespace Server.Views
 
         private void BlockedOnlyButton_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            // 切换仅显示具有某些属性（如阻挡）的单元格，用于快速选取带有指定属性的区域
             Map.AttributeSelection = !Map.AttributeSelection;
         }
     }
@@ -383,6 +448,12 @@ namespace Server.Views
 
 namespace Server.Views.DirectX
 {
+    // DXManager: 封装 DirectX 设备与渲染资源的生命周期管理
+    // 说明（新手）：
+    // - 负责创建和维护 Direct3D 设备、主渲染表面（MainSurface）、Sprite、Line 等对象。
+    // - 提供纹理加载、设置渲染表面、透明度与混合模式的辅助函数。
+    // - 当窗口大小或设备状态发生变化时需要 ResetDevice / AttemptReset / AttemptRecovery 来恢复设备。
+    // - 大部分方法直接操作底层 DirectX 资源，修改时需小心资源释放顺序以避免内存或 GPU 资源泄露。
     public class DXManager : IDisposable
     {
         public Graphics Graphics;
@@ -430,6 +501,8 @@ namespace Server.Views.DirectX
 
         public void Create()
         {
+            // 创建 Direct3D 设备并加载资源（在窗体 OnLoad 时调用）
+            // 说明（新手）：Device 的创建依赖窗口句柄和当前窗口大小，创建失败通常与驱动或权限有关。
             Parameters = new PresentParameters
             {
                 Windowed = true,
@@ -450,6 +523,8 @@ namespace Server.Views.DirectX
 
         private unsafe void LoadTextures()
         {
+            // 初始化 Sprite/Line，以及为渲染准备主表面和属性纹理(AttributeTexture)
+            // 说明（新手）：AttributeTexture 用于绘制选区/属性覆盖（如黄色/红色高亮），它以 32x48 大小初始化并填充默认像素。
             Sprite = new Sprite(Device);
             Line = new Line(Device) { Width = 1F };
 
@@ -472,6 +547,8 @@ namespace Server.Views.DirectX
         }
         private void CleanUp()
         {
+            // 释放/清理 DirectX 资源（在 ResetDevice 或 Dispose 时调用）
+            // 说明（新手）：释放顺序重要，先释放依赖对象（Sprite/Line/Surface/Texture），最后释放库中的纹理。
             if (Sprite != null)
             {
                 if (!Sprite.IsDisposed)
@@ -519,6 +596,7 @@ namespace Server.Views.DirectX
             CurrentSurface = surface;
             Device.SetRenderTarget(0, surface);
         }
+        // 切换渲染目标表面：用于将绘制操作重定向到 ControlTexture（离屏渲染）或主表面
         public void SetOpacity(float opacity)
         {
             Device.SetSamplerState(0, SamplerState.MagFilter, 0);
@@ -548,6 +626,7 @@ namespace Server.Views.DirectX
             Opacity = opacity;
             Sprite.Flush();
         }
+        // 设置全局不透明度：影响后续 Sprite 绘制的透明度
         public void SetBlend(bool value, float rate = 1F)
         {
             if (value == Blending) return;
@@ -574,6 +653,7 @@ namespace Server.Views.DirectX
 
             Device.SetRenderTarget(0, CurrentSurface);
         }
+        // 开启/关闭混合模式，rate 控制混合因子（用于特殊效果，例如半透明叠加）
         public void SetColour(int colour)
         {
             Sprite.Flush();
@@ -613,6 +693,7 @@ namespace Server.Views.DirectX
             Parameters = parameters;
             LoadTextures();
         }
+        // ResetDevice: 在设备需重建时调用（例如窗口大小改变或设备被重置）
         public void AttemptReset()
         {
             try
@@ -636,6 +717,7 @@ namespace Server.Views.DirectX
                 SEnvir.SaveError(ex.ToString());
             }
         }
+        // AttemptReset / AttemptRecovery: 处理设备丢失情况的恢复逻辑（常见于显卡驱动切换、睡眠等）
         public void AttemptRecovery()
         {
             try
@@ -675,6 +757,8 @@ namespace Server.Views.DirectX
 
             graphics.TextContrast = 0;
         }
+
+        // ConfigureGraphics: 为 System.Drawing.Graphics 设置高质量渲染参数（用于非 DirectX 的文本/调试绘制）
 
         #region IDisposable Support
 
@@ -771,6 +855,11 @@ namespace Server.Views.DirectX
 
     public sealed class MirLibrary : IDisposable
     {
+        // MirLibrary: 代表一个资源库文件（.mir 或类似格式），延迟读取并为图像提供 MirImage 实例
+        // 说明（新手）：
+        // - ReadLibrary() 会解析二进制资源并构造 MirImage 数组；读取是延迟的（首次使用时加载），通过 CheckImage 保证加载完成。
+        // - CreateImage/CreateShadow/CreateOverlay 方法会把原始二进制数据转换成 DirectX 的 Texture 并缓存，避免每帧重复创建。
+        // - 使用后请调用 Dispose/DisposeTexture 来释放 Texture 以避免显存泄露。
         public readonly object LoadLocker = new object();
 
         public string FileName;
@@ -805,6 +894,12 @@ namespace Server.Views.DirectX
                 return;
             }
 
+            // 读取嵌入的库数据流并解析 MirImage 条目
+            // 实现细节（新手注意）：
+            // - 第一部分读取一个长度（int），然后把该长度的数据拷贝到 MemoryStream 中作为库的实际内容。
+            // - 接着读取一个 header int：低 25 位包含条目数量（count），高位包含版本信息（version）。
+            // - 根据 version 决定解析方式（不同版本可能改变了数据布局），这里只用 version==0 做兼容处理。
+            // - 循环检查每个条目，先读取一个布尔值表示该索引是否存在，存在则用 MirImage 解析并存入数组。
             using (MemoryStream mstream = new MemoryStream(_BReader.ReadBytes(_BReader.ReadInt32())))
             using (BinaryReader reader = new BinaryReader(mstream))
             {
@@ -815,6 +910,7 @@ namespace Server.Views.DirectX
 
                 if (version == 0)
                 {
+                    // 旧版处理：整个 value 即为 count
                     count = value;
                 }
 
@@ -822,8 +918,10 @@ namespace Server.Views.DirectX
 
                 for (int i = 0; i < Images.Length; i++)
                 {
+                    // 每个条目以一个布尔标记开始，标记为 false 则表示该索引为空（跳过）
                     if (!reader.ReadBoolean()) continue;
 
+                    // 构造 MirImage 时会读取该条目的元数据位置与尺寸信息，但不会立即创建 GPU 纹理（延迟加载）
                     Images[i] = new MirImage(reader, Manager, version);
                 }
             }
@@ -1194,6 +1292,11 @@ namespace Server.Views.DirectX
 
     public sealed class MirImage : IDisposable
     {
+        // MirImage: 表示库中单个图片条目，负责持有 Image/Shadow/Overlay 的二进制数据和对应的 DirectX Texture
+        // 说明（新手）：
+        // - ImageData/ShadowData/OverlayData 保存原始像素/压缩数据，CreateImage 等方法会将其写入到 DirectX Texture。
+        // - VisiblePixel 用于像素级点击检测（判断某个像素是否透明），供精确选取/碰撞判断使用。
+        // - ExpireTime 用于缓存失效策略，Manager.TextureList 管理活跃纹理，确保定期回收不再使用的纹理。
         public int Version;
         public int Position;
 
@@ -1321,6 +1424,12 @@ namespace Server.Views.DirectX
 
         public unsafe bool VisiblePixel(Point p, bool acurrate)
         {
+            // VisiblePixel: 像素级可见性检测
+            // 说明（新手）：
+            // - 图片数据在二进制里以 4x4 的块为单位压缩/存放（每个块 8 字节），所以需要先根据坐标找到对应块。
+            // - col0/col1 存放该块是否存在不透明像素的概览信息，若两者均为 0 则该块完全透明，可快速返回 false。
+            // - 当 `accurate` 为 false 时，函数可以使用块级概览（col1 < col0）来粗略判断是否可见，从而加快检测。
+            // - 精确检测会进一步检查具体像素位（通过位运算从 ImageData 的后续字节获取具体像素掩码）。
             if (p.X < 0 || p.Y < 0 || !ImageValid || ImageData == null) return false;
 
             int w = Width + (4 - Width % 4) % 4;
@@ -1329,20 +1438,26 @@ namespace Server.Views.DirectX
             if (p.X >= w || p.Y >= h)
                 return false;
 
+            // 计算包含该像素的 4x4 块在数据中的块索引
             int x = (p.X - p.X % 4) / 4;
             int y = (p.Y - p.Y % 4) / 4;
             int index = (y * (w / 4) + x) * 8;
 
+            // 前两个 short 值（合并为 int）是对该块的快速掩码统计
             int col0 = ImageData[index + 1] << 8 | ImageData[index], col1 = ImageData[index + 3] << 8 | ImageData[index + 2];
 
+            // 如果概览信息显示完全透明，则直接返回 false
             if (col0 == 0 && col1 == 0) return false;
 
+            // 非精确模式：可通过 col1 < col0 的简单比较来判断是否可能有可见像素
             if (!acurrate || col1 < col0) return true;
 
+            // 精确模式：检查具体像素位
             x = p.X % 4;
             y = p.Y % 4;
             x *= 2;
 
+            // 通过按位与检查两位掩码，若任一位不是 1（表示可见），则返回 true
             return (ImageData[index + 4 + y] & 1 << x) >> x != 1 || (ImageData[index + 4 + y] & 1 << x + 1) >> x + 1 != 1;
         }
 
@@ -1377,6 +1492,12 @@ namespace Server.Views.DirectX
 
         public unsafe void CreateImage(BinaryReader reader)
         {
+            // CreateImage: 从二进制流创建 DirectX Texture 并把原始像素数据写入 GPU 纹理
+            // 步骤说明（新手）：
+            // 1) 根据 Width/Height 计算对齐后的像素宽高（通常向上对齐到 4 的倍数），以满足存储布局。
+            // 2) 创建一个 Texture 并 LockRectangle 获取 GPU 内存的指针（DataRectangle）。
+            // 3) 在 reader 上 Seek 到本条目真实数据位置（Position），读取 ImageDataSize 字节并直接写入 GPU 指针。
+            // 4) UnlockRectangle 完成写入，标记 ImageValid 并把该 MirImage 加入 Manager.TextureList 以便管理生命周期。
             if (Position == 0) return;
 
             int w = Width + (4 - Width % 4) % 4;
@@ -1390,6 +1511,7 @@ namespace Server.Views.DirectX
 
             lock (reader)
             {
+                // 注意：这里对同一个 BinaryReader 加锁，保证多线程加载纹理时不会并发读写同一流
                 reader.BaseStream.Seek(Position, SeekOrigin.Begin);
                 byte[] buffer = reader.ReadBytes(ImageDataSize);
                 SharpDX.Utilities.Write(rect.DataPointer, buffer, 0, buffer.Length);
@@ -1403,6 +1525,11 @@ namespace Server.Views.DirectX
         }
         public unsafe void CreateShadow(BinaryReader reader)
         {
+            // CreateShadow: shadow 数据通常紧跟在 image 数据之后，位置为 Position + ImageDataSize
+            // 说明（新手）：
+            // - 如果 Image 尚未创建，会先创建 Image，确保原始像素数据已被读入。
+            // - Shadow 大小计算同样需要做 4 的对齐；读取位置是 Position + ImageDataSize。
+            // - 创建完毕后将 Shadow 标记为有效（ShadowValid = true）。
             if (Position == 0) return;
 
             if (!ImageValid)
@@ -1430,6 +1557,8 @@ namespace Server.Views.DirectX
         }
         public unsafe void CreateOverlay(BinaryReader reader)
         {
+            // CreateOverlay: overlay 紧跟在 image + shadow 数据之后，位置为 Position + ImageDataSize + ShadowDataSize
+            // 说明（新手）：Overlay 常用于绘制额外特效或覆盖层，创建流程与 CreateImage/CreateShadow 类似。
             if (Position == 0) return;
 
             if (!ImageValid)
@@ -1511,6 +1640,12 @@ namespace Server.Views.DirectX
     {
         public DXManager Manager;
 
+        // MapControl: 负责地图的离屏渲染、格子绘制、选择逻辑与鼠标交互
+        // 说明（新手）：
+        // - MapControl 使用 DXManager 提供的 Device/Sprite/Line 来绘制地图到一个离屏 `ControlTexture`，
+        //   然后由 MapViewer 将该纹理绘制到窗口上。这种模式可以避免每帧都重绘所有格子。
+        // - 重要职责包括：CreateTexture/DisposeTexture（管理离屏纹理），DrawFloor（按层次绘制地图格子），
+        //   Load（从 .map 文件解析地图数据），以及处理鼠标交互（MouseDown/MouseMove/MouseUp）。
         public MapControl(DXManager manager)
         {
             Manager = manager;
@@ -1822,6 +1957,10 @@ namespace Server.Views.DirectX
 
         protected virtual void CreateTexture()
         {
+            // CreateTexture: 创建或更新离屏渲染纹理（ControlTexture）并把绘制操作重定向到该纹理
+            // 说明（新手）：
+            // - 如果画布尺寸改变（Size != TextureSize）会重新创建纹理并清空旧纹理。
+            // - 在创建完成后会调用 OnClearTexture 来实际绘制地图的底图（DrawFloor 等）。
             if (ControlTexture == null || Size != TextureSize)
             {
                 DisposeTexture();
@@ -1843,6 +1982,8 @@ namespace Server.Views.DirectX
         }
         protected virtual void OnClearTexture()
         {
+            // OnClearTexture: 在新的离屏纹理上清理并绘制地图底层
+            // 说明（新手）：默认实现调用 DrawFloor() 绘制地面与图块；这里也可以扩展绘制对象层/放置点等。
             DrawFloor();
 
             //DrawObjects();
@@ -1904,6 +2045,11 @@ namespace Server.Views.DirectX
 
         public void DrawFloor()
         {
+            // DrawFloor: 分层绘制地图格子（底层、中层、前景），并处理动画帧与混合绘制
+            // 说明（新手）：
+            // - 该方法按照行列遍历当前可见区域（由 StartX/StartY 与 Size 决定），通过 MirLibrary 绘制对应的图像索引。
+            // - 绘制顺序遵循后底-中-前的顺序，处理不同尺寸（1x / 2x）以及动画与混合（Blend）场景。
+            // - 选择/属性高亮使用 `Manager.AttributeTexture` 绘制叠加颜色（如黄色/红色）。
             int minX = Math.Max(0, StartX - 1);
             int maxX = Math.Min(Width - 1, StartX + (int)Math.Ceiling(Size.Width / CellWidth));
 
@@ -2131,6 +2277,11 @@ namespace Server.Views.DirectX
 
         public void Load(string fileName)
         {
+            // Load: 从磁盘读取 .map 文件并解析到 Cells 数组
+            // 说明（新手）：
+            // - 文件既可以是完整路径也可以只给文件名（会在 Config.MapPath 下查找带 .map 后缀的文件）。
+            // - 解析会读取地图宽高并填充每个格子的图层索引、动画帧、光照与标志位（Flag）。
+            // - 读取完成后会把 TextureValid 设为 false，触发在下一次绘制时重建离屏纹理。
             try
             {
                 string path = null;

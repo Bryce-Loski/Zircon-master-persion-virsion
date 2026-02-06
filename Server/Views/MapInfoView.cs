@@ -35,6 +35,11 @@ namespace Server.Views
 
         private void MiningGridView_CustomRowCellEditForEditing(object sender, CustomRowCellEditEventArgs e)
         {
+            // 事件：当在 MiningGridView 编辑某个单元格时触发，用来动态为 "Region" 列提供筛选过的下拉编辑器。
+            // 说明（新手）：
+            // - 该方法根据当前选中的地图（MapInfo）筛选 `MapRegion` 集合，只展示属于当前地图的区域。
+            // - 返回的是一个临时创建的 `RepositoryItemLookUpEdit`，不会改变全局的 RegionLookUpEdit。
+            // - 这使得在“采集/挖矿”条目里选择区域时，只能选择当前地图相关的区域。
             if (e.Column.FieldName == "Region")
             {
                 var currentMapRow = MapInfoGridView.GetRow(MapInfoGridView.FocusedRowHandle) as MapInfo;
@@ -70,6 +75,10 @@ namespace Server.Views
 
         private void UpdateInfoStats()
         {
+            // 非事件方法：检查旧版字段（如 MonsterHealth/MonsterDamage 等），并把它们转换为新的 `MapInfoStat` 条目。
+            // 说明（新手）：
+            // - 这是一次性的数据迁移/清理工具；如果发现旧字段非 0，会创建对应的 BuffStat 并清零旧字段，最后保存 Session。
+            // - 由于它会调用 `SMain.Session.Save(true)`，请在确认变更前做好备份（或在测试环境运行）。
             bool needSave = false;
 
             foreach (var map in SMain.Session.GetCollection<MapInfo>().Binding)
@@ -193,11 +202,19 @@ namespace Server.Views
 
         private void SaveButton_ItemClick(object sender, ItemClickEventArgs e)
         {
+            // 事件：点击“保存数据库”按钮。
+            // 说明（新手）：
+            // - 触发后会调用 `SMain.Session.Save(true)` 将当前内存对象集合持久化到数据库。
+            // - 保存是即时且会覆盖数据库中对应数据；在大型改动前建议先备份数据库或在测试环境操作。
             SMain.Session.Save(true);
         }
 
         private void EditButtonEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
+            // 事件：点击 RegionGridView 中的“编辑”按钮（按钮列使用 EditButtonEdit）。
+            // 说明（新手）：
+            // - 该处理器会打开或聚焦 `MapViewer` 窗口，并将当前选中的 `MapRegion` 传给地图查看器用于编辑/显示。
+            // - `MapViewer.CurrentViewer.Save()` 在这里被调用：确保 MapViewer 中的未保存更改先被保存。
             if (MapViewer.CurrentViewer == null)
             {
                 MapViewer.CurrentViewer = new MapViewer();
@@ -210,6 +227,7 @@ namespace Server.Views
 
             if (view == null) return;
 
+            // 保存 MapViewer 当前状态（如果有），再设置 MapRegion 以便在 MapViewer 中加载该区域供编辑。
             MapViewer.CurrentViewer.Save();
 
             MapViewer.CurrentViewer.MapRegion = view.GetFocusedRow() as MapRegion;
@@ -217,16 +235,29 @@ namespace Server.Views
 
         private void ImportButton_ItemClick(object sender, ItemClickEventArgs e)
         {
+            // 事件：导入 JSON 数据到 MapInfo 集合。
+            // 说明（新手）：
+            // - `JsonImporter.Import<T>()` 通常会弹出文件对话框，读取 JSON 并将数据导入到 Session 中的集合。
+            // - 导入后如果需要保存到数据库，可能还需手动点击“保存数据库”。
             JsonImporter.Import<MapInfo>();
         }
 
         private void ExportButton_ItemClick(object sender, ItemClickEventArgs e)
         {
+            // 事件：将 `MapInfo` 集合导出为 JSON（通常基于当前 GridView 选择/全部数据）。
+            // 说明（新手）：
+            // - `JsonExporter.Export<T>(GridView)` 会读取提供的 GridView 数据并弹出文件保存对话框来保存 JSON 文件。
+            // - 导出的是当前视图的数据（可被 `JsonImporter` 复原）。
             JsonExporter.Export<MapInfo>(MapInfoGridView);
         }
 
         private void InsertRowButton_ItemClick(object sender, ItemClickEventArgs e)
         {
+            // 事件：在当前选中地图之后插入一个新的 MapInfo 行。
+            // 说明（新手）：
+            // - 先检查当前是否选中地图（focusedMap），如果没有会提示用户选择一行。
+            // - 询问用户确认后，使用 `SMain.Session.InsertObjectAfter<T>(index)` 在数据集合中插入新对象。
+            // - 插入后刷新视图并将焦点移动到新插入的行，方便用户继续编辑新地图的字段。
             var mapCollection = SMain.Session.GetCollection<MapInfo>();
 
             if (MapInfoGridView.GetFocusedRow() is not MapInfo focusedMap)

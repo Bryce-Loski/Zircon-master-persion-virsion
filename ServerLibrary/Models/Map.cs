@@ -67,7 +67,7 @@ namespace Server.Models
 
             if (!File.Exists(path))
             {
-                SEnvir.Log($"Map: {path} not found.");
+                SEnvir.Log($"地图文件未找到: {path}。 ");
                 return;
             }
 
@@ -113,7 +113,7 @@ namespace Server.Models
             {
                 if (info.Monster == null)
                 {
-                    SEnvir.Log($"Failed to spawn Unset Guard Map:{Info.Description}, Location: {info.X}, {info.Y}");
+                    SEnvir.Log($"[生成守卫失败] 地图:{Info.Description}, 位置: {info.X}, {info.Y}");
                     continue;
                 }
 
@@ -122,7 +122,7 @@ namespace Server.Models
 
                 if (!mob.Spawn(this, new Point(info.X, info.Y)))
                 {
-                    SEnvir.Log($"Failed to spawn Guard Map:{Info.Description}, Location: {info.X}, {info.Y}");
+                    SEnvir.Log($"[生成守卫失败] 地图:{Info.Description}, 位置: {info.X}, {info.Y}");
                     continue;
                 }
             }
@@ -140,7 +140,7 @@ namespace Server.Models
 
                     if (!mob.Spawn(castle, info))
                     {
-                        SEnvir.Log($"Failed to spawn Flag Map:{Info.Description}, Location: {info.X}, {info.Y}");
+                        SEnvir.Log($"[生成旗帜失败] 地图:{Info.Description}, 位置: {info.X}, {info.Y}");
                         continue;
                     }
                 }
@@ -203,7 +203,7 @@ namespace Server.Models
 
                     if (source == null)
                     {
-                        SEnvir.Log($"[Cell] Bad Point, Source: {Info.FileName} {region.Description}, X:{sPoint.X}, Y:{sPoint.Y}");
+                        SEnvir.Log($"[单元格错误] 源: {Info.FileName} {region.Description}, X:{sPoint.X}, Y:{sPoint.Y}");
                         continue;
                     }
 
@@ -458,7 +458,7 @@ namespace Server.Models
                     if (Info.Delay >= 1000000)
                     {
                         foreach (SConnection con in SEnvir.Connections)
-                            con.ReceiveChat($"{mob.MonsterInfo.MonsterName} has appeared.", MessageType.System);
+                            con.ReceiveChat($"{mob.MonsterInfo.MonsterName} 已出现。", MessageType.System);
                     }
                     else
                     {

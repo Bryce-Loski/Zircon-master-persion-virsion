@@ -4,6 +4,12 @@ namespace Server.Views
 {
     partial class MapInfoView
     {
+        // 说明 (给新手的快速入门提示):
+        //  - 本文件由 Visual Studio 的 WinForms 设计器自动生成 (Designer)。它负责创建窗体上的控件并设置属性。
+        //  - 一般不要在这里实现复杂逻辑或事件处理器（这些应在 `MapInfoView.cs` 中实现），但添加注释以帮助阅读是可以的。
+        //  - 主要控件：`MapInfoGridControl`(主表格)，包含多个 Detail Views: Regions/Guards/Mining/BuffStats；以及顶部的 `ribbon`（工具栏）。
+        //  - Grid 列通过 `FieldName` 与数据模型属性绑定，LookUpEdit/RepositoryItems 提供自定义编辑器/下拉显示。
+        //  - 若要查找按钮的行为（例如保存/导入/导出等），请在 `MapInfoView.cs` 中搜索对应的方法名：`SaveButton_ItemClick`、`ImportButton_ItemClick` 等。
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -25,8 +31,11 @@ namespace Server.Views
         #region Windows Form Designer generated code
 
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        /// InitializeComponent 方法：设计器会在这里生成控件与布局代码。
+        /// 注意（给新手）：
+        /// - 尽量不要在此处添加业务逻辑；只做阅读/注释或非常小的显示相关改动。
+        /// - 事件处理器通常在 `MapInfoView.cs` 中定义（例如 `SaveButton_ItemClick`）。
+        /// - 若需要变更控件属性，优先在设计器中修改（.Designer.cs 会同步更新），或在窗体构造函数/Load 事件后修改。
         /// </summary>
         private void InitializeComponent()
         {
@@ -121,7 +130,10 @@ namespace Server.Views
             SuspendLayout();
             // 
             // RegionGridView
-            // 
+            //
+            // 说明：这是 `MapInfoGridControl` 的一个 Detail View，用来显示地图的“区域(Regions)”信息。
+            // 每个 Detail View 都是一个 GridView（表格视图），通常和主数据模型的集合属性对应。
+            // 本视图的列：Description (区域描述)、Size (区域大小)、以及一个用于编辑的按钮列。
             RegionGridView.Columns.AddRange(new GridColumn[] { gridColumn18, gridColumn19, gridColumn20 });
             RegionGridView.GridControl = MapInfoGridControl;
             RegionGridView.Name = "RegionGridView";
@@ -183,7 +195,16 @@ namespace Server.Views
             EditButtonEdit.ButtonClick += EditButtonEdit_ButtonClick;
             // 
             // MapInfoGridControl
-            // 
+            //
+            // 这是页面的主表格控件，承载主视图 `MapInfoGridView` 以及多个 Detail View（下拉/展开显示子集合）：
+            // - Regions 对应 RegionGridView
+            // - Guards 对应 GuardsGridView
+            // - Mining 对应 MiningGridView
+            // - BuffStats 对应 MapInfoStatsGridView
+            //
+            // RepositoryItems (例如 LightComboBox、MonsterLookUpEdit) 用来为列提供自定义编辑器：
+            // - LookUpEdit 通常用于选择外部列表项（显示名由 `DisplayMember` 指定）。
+            // - ImageComboBox / ButtonEdit 提供图标或按钮交互。
             MapInfoGridControl.Dock = System.Windows.Forms.DockStyle.Fill;
             gridLevelNode1.LevelTemplate = RegionGridView;
             gridLevelNode1.RelationName = "Regions";
@@ -618,7 +639,10 @@ namespace Server.Views
             colBackground.Width = 40;
             // 
             // ribbon
-            // 
+            //
+            // 说明：顶部的 RibbonControl 是窗口的操作栏，包含保存/导入/导出/插入行等按钮。
+            // 每个 BarButtonItem 的 `ItemClick` 事件在主代码文件中处理（查看 `MapInfoView.cs`）。
+            // 例如：SaveButton -> `SaveButton_ItemClick`（保存数据库），ImportButton/ExportButton -> 导入/导出 JSON。
             ribbon.ExpandCollapseItem.Id = 0;
             ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbon.ExpandCollapseItem, ribbon.SearchEditItem, SaveButton, ImportButton, ExportButton, InsertRowButton });
             ribbon.Location = new System.Drawing.Point(0, 0);
@@ -755,6 +779,11 @@ namespace Server.Views
         #endregion
 
 
+        // 私有字段（控件声明）
+        // 这些字段由设计器声明并初始化。常见类型：
+        // - `GridControl` / `GridView`：数据表格与子视图
+        // - `RepositoryItem*`：列的编辑器（下拉、图标、按钮）
+        // - `BarButtonItem`：Ribbon 上的按钮，连接到事件处理器
         private DevExpress.XtraBars.Ribbon.RibbonControl ribbon;
         private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage1;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup1;
