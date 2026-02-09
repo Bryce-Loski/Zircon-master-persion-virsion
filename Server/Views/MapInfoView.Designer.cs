@@ -100,6 +100,7 @@ namespace Server.Views
             ImportButton = new DevExpress.XtraBars.BarButtonItem();
             ExportButton = new DevExpress.XtraBars.BarButtonItem();
             InsertRowButton = new DevExpress.XtraBars.BarButtonItem();
+            DeleteRowButton = new DevExpress.XtraBars.BarButtonItem();
             ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             JsonImportExport = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
@@ -643,9 +644,9 @@ namespace Server.Views
             // 每个 BarButtonItem 的 `ItemClick` 事件在主代码文件中处理（查看 `MapInfoView.cs`）。
             // 例如：SaveButton -> `SaveButton_ItemClick`（保存数据库），ImportButton/ExportButton -> 导入/导出 JSON。
             ribbon.ExpandCollapseItem.Id = 0;
-            ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbon.ExpandCollapseItem, ribbon.SearchEditItem, SaveButton, ImportButton, ExportButton, InsertRowButton });
+            ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbon.ExpandCollapseItem, ribbon.SearchEditItem, SaveButton, ImportButton, ExportButton, InsertRowButton, DeleteRowButton });
             ribbon.Location = new System.Drawing.Point(0, 0);
-            ribbon.MaxItemId = 9;
+            ribbon.MaxItemId = 10;
             ribbon.Name = "ribbon";
             ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] { ribbonPage1 });
             ribbon.Size = new System.Drawing.Size(704, 144);
@@ -687,6 +688,15 @@ namespace Server.Views
             InsertRowButton.Name = "InsertRowButton";
             InsertRowButton.ItemClick += InsertRowButton_ItemClick;
             // 
+            // DeleteRowButton
+            // 
+            DeleteRowButton.Caption = "删除行";
+            DeleteRowButton.Id = 7;
+            DeleteRowButton.ImageOptions.Image = (System.Drawing.Image)resources.GetObject("DeleteRowButton.ImageOptions.Image");
+            DeleteRowButton.ImageOptions.LargeImage = (System.Drawing.Image)resources.GetObject("DeleteRowButton.ImageOptions.LargeImage");
+            DeleteRowButton.Name = "DeleteRowButton";
+            DeleteRowButton.ItemClick += DeleteRowButton_ItemClick;
+            // 
             // ribbonPage1
             // 
             ribbonPage1.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] { ribbonPageGroup1, JsonImportExport, EditGroup });
@@ -711,6 +721,7 @@ namespace Server.Views
             // EditGroup
             // 
             EditGroup.ItemLinks.Add(InsertRowButton);
+            EditGroup.ItemLinks.Add(DeleteRowButton);
             EditGroup.Name = "EditGroup";
             EditGroup.Text = "编辑";
             // 
@@ -841,6 +852,7 @@ namespace Server.Views
         private DevExpress.XtraEditors.Repository.RepositoryItemLookUpEdit RegionLookUpEdit;
         private GridColumn colBackground;
         private DevExpress.XtraBars.BarButtonItem InsertRowButton;
+        private DevExpress.XtraBars.BarButtonItem DeleteRowButton;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup EditGroup;
     }
 }

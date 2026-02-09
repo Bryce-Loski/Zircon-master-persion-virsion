@@ -280,5 +280,31 @@ namespace Server.Views
             MapInfoGridView.FocusedRowHandle = rowHandle;
             MapInfoGridView.SelectRow(rowHandle);
         }
+
+        private void DeleteRowButton_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // 事件：删除当前选中的 MapInfo 行。
+            // 说明（新手）：
+            // - 先检查当前是否选中地图（focusedMap），如果没有会提示用户选择一行。
+            // - 询问用户确认后，调用 `focusedMap.Delete()` 从数据库集合中删除对象。
+            // - 删除后刷新视图。注意：删除操作在保存数据库后才会永久生效。
+            if (MapInfoGridView.GetFocusedRow() is not MapInfo focusedMap)
+            {
+                XtraMessageBox.Show("Please select a map to delete.", "Delete Map", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult result = XtraMessageBox.Show(
+                $"Are you sure you want to delete map '{focusedMap.FileName} - {focusedMap.Description}'?\n\nThis will also delete all associated regions, guards, mining spots, and buff stats.",
+                "Delete Map",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result != DialogResult.Yes) return;
+
+            focusedMap.Delete();
+
+            MapInfoGridView.RefreshData();
+        }
     }
 }
