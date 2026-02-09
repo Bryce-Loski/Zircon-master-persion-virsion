@@ -773,19 +773,20 @@ namespace Library
         Phantom,
     }
 
+    //技能类型（不是技能系别，技能系别是 MagicSchool）
     public enum MagicType
     {
         None,
 
-        Swordsmanship = 100,
-        PotionMastery = 101,
-        Slaying = 102,
-        Thrusting = 103,
-        HalfMoon = 104,
-        ShoulderDash = 105,
-        FlamingSword = 106,
-        DragonRise = 107,
-        BladeStorm = 108,
+        Swordsmanship = 100, //基本剑术
+        PotionMastery = 101, 
+        Slaying = 102, 
+        Thrusting = 103, 
+        HalfMoon = 104, 
+        ShoulderDash = 105, 
+        FlamingSword = 106, 
+        DragonRise = 107, 
+        BladeStorm = 108, 
         DestructiveSurge = 109,
         Interchange = 110,
         Defiance = 111,
@@ -816,29 +817,29 @@ namespace Library
         FireSword = 136,
         FlameArt = 137, //NOT CODED
 
-        FireBall = 201,
-        LightningBall = 202,
-        IceBolt = 203,
-        GustBlast = 204,
-        Repulsion = 205,
-        ElectricShock = 206,
-        Teleportation = 207,
-        AdamantineFireBall = 208,
-        ThunderBolt = 209,
-        IceBlades = 210,
-        Cyclone = 211,
-        ScortchedEarth = 212,
-        LightningBeam = 213,
-        FrozenEarth = 214,
-        BlowEarth = 215,
-        FireWall = 216,
-        ExpelUndead = 217,
-        GeoManipulation = 218,
-        MagicShield = 219,
-        FireStorm = 220,
-        LightningWave = 221,
-        IceStorm = 222,
-        DragonTornado = 223,
+        FireBall = 201, //火球术
+        LightningBall = 202,//霹雳掌
+        IceBolt = 203,//冰月神掌
+        GustBlast = 204,//风掌
+        Repulsion = 205,//抗拒火环
+        ElectricShock = 206,//雷电术
+        Teleportation = 207,//瞬息移动
+        AdamantineFireBall = 208,//大火球
+        ThunderBolt = 209,//雷电术
+        IceBlades = 210,//冰月震天
+        Cyclone = 211,//击风
+        ScortchedEarth = 212,//地狱火
+        LightningBeam = 213,//疾光电影
+        FrozenEarth = 214,//冰沙掌
+        BlowEarth = 215,//爆裂火焰
+        FireWall = 216,//火墙
+        ExpelUndead = 217,//圣言术
+        GeoManipulation = 218,//魄冰刺
+        MagicShield = 219,//魔法盾
+        FireStorm = 220,//焰天火雨
+        LightningWave = 221,//怒神霹雳
+        IceStorm = 222,//冰雨
+        DragonTornado = 223,//龙卷风
         GreaterFrozenEarth = 224,
         ChainLightning = 225,
         MeteorShower = 226,
@@ -1006,15 +1007,16 @@ namespace Library
         GreenSludgeBall = 540,
     }
 
+    //技能属性（比如主动、被动、增益、减益、持续伤害等）
     public enum MagicProperty
     {
         None = 0,
 
-        Active = 1,
-        Passive = 2,
-        Augmentation = 3,
-        Toggle = 4,
-        Charge = 5
+        Active = 1, //主动技能（需要玩家点击/施法）
+        Passive = 2,//被动技能（持续生效的技能，不需要玩家操作）
+        Augmentation = 3,//增益/强化技能（增强其他技能效果的技能，比如 Endurance 增加防御力）
+        Toggle = 4,//开关技能（需要玩家点击切换状态的技能，比如 Invisibility）
+        Charge = 5//蓄力技能（需要玩家按住施法键来积蓄效果的技能，比如 DragonRise）
     }
 
     //NF = No Frame

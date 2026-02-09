@@ -598,6 +598,11 @@ namespace Library.Network.ServerPackets
         public int Slot { get; set; }
         public Stats NewStats { get; set; }
     }
+
+    // 说明（给新手）：
+    // - ItemStatsRefreshed 包用于通知客户端指定装备槽位的属性已经更新，客户端会根据这个包来刷新界面上的属性显示。
+    // - 这个包包含了 GridType（装备所在的格子类型，例如 Equipment）、Slot（装备所在的槽位，例如 Weapon）和 NewStats（装备的新属性值）。
+    // 当客户端收到这个包时，会根据 GridType 和 Slot 来找到对应的装备，并使用 NewStats 来更新界面上的属性显示。
     public sealed class ItemStatsRefreshed : Packet
     {
         public GridType GridType { get; set; }

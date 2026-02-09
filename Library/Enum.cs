@@ -437,21 +437,22 @@ namespace Library
         AccessoryRefine,
     }
 
+    //技能系别
     public enum MagicSchool
     {
         None,
-        Passive,
-        WeaponSkills,
-        Neutral,
-        Fire,
-        Ice,
-        Lightning,
-        Wind,
-        Holy,
-        Dark,
-        Phantom,
-        Combat,
-        Assassination
+        Passive, //被动技能
+        WeaponSkills,//武器技能
+        Neutral,//中立技能
+        Fire,//火系技能
+        Ice,//冰系技能
+        Lightning,//雷系技能
+        Wind,//风系技能
+        Holy,//圣系技能
+        Dark,//暗系技能
+        Phantom,//魅影系技能
+        Combat,//战斗系技能
+        Assassination//刺杀系技能
     }
     
     public enum Element : byte

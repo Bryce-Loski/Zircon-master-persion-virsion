@@ -669,7 +669,7 @@ namespace Client.Envir
                     break;
                 case KeyBindAction.AutoRunToggle:
                     bind.Category = "Functions";
-                    bind.Key1 = Keys.D;
+                    bind.Key1 = Keys.None;
                     break;
                 case KeyBindAction.ChangeChatMode:
                     bind.Category = "Functions";

@@ -128,7 +128,7 @@ namespace Library.SystemModels
         /// 
         /// LightSetting 枚举值：
         /// - Normal：正常光照
-        /// - Dark：黑暗（可能需要火焰照明）
+        /// - Dark：黑暗（需要火把照明）
         /// - Bright：明亮
         /// 
         /// 客户端光照处理：
@@ -191,7 +191,7 @@ namespace Library.SystemModels
         private FightSetting _Fight;
 
         /// <summary>
-        /// 【是否允许传送戒指(日月戒指)】控制玩家是否可以在此地图使用传送戒指
+        /// 【是否允许传送戒指】控制玩家是否可以在此地图使用传送戒指
         /// </summary>
         public bool AllowRT
         {
@@ -283,7 +283,7 @@ namespace Library.SystemModels
         private bool _CanMine;
 
         /// <summary>
-        /// 【是否允许夫妻回城符】控制玩家是否可以在此地图上使用夫妻回城符（传送到配偶所在地图）
+        /// 【是否允许夫妻传送】控制玩家是否可以在此地图上使用夫妻传送（传送到配偶所在地图）
         /// </summary>
         public bool CanMarriageRecall
         {
