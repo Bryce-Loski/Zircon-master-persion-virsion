@@ -183,7 +183,7 @@
             gridColumn2.Visible = true;
             gridColumn2.VisibleIndex = 1;
             // 
-            // gridColumn3
+            // 地图上显示的图标
             // 
             gridColumn3.Caption = "图标";
             gridColumn3.FieldName = "Icon";

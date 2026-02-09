@@ -4,7 +4,6 @@ namespace Server.Views
 {
     partial class MapInfoView
     {
-        // 说明 (给新手的快速入门提示):
         //  - 本文件由 Visual Studio 的 WinForms 设计器自动生成 (Designer)。它负责创建窗体上的控件并设置属性。
         //  - 一般不要在这里实现复杂逻辑或事件处理器（这些应在 `MapInfoView.cs` 中实现），但添加注释以帮助阅读是可以的。
         //  - 主要控件：`MapInfoGridControl`(主表格)，包含多个 Detail Views: Regions/Guards/Mining/BuffStats；以及顶部的 `ribbon`（工具栏）。

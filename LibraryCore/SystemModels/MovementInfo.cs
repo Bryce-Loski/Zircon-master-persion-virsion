@@ -2,8 +2,14 @@
 
 namespace Library.SystemModels
 {
+    // - 本类表示地图上的一个移动连接（MovementInfo），定义了从一个地图区域（SourceRegion）到另一个地图区域（DestinationRegion）的移动路径。
+    // - 每个 MovementInfo 可以有一个关联的图标（Icon），以及一些条件（例如需要的物品、需要的刷新点、需要的洞穴、需要的副本等）和效果（Effect）。
+    // - 这些条件和效果可以在地图编辑器中设置，以控制玩家在游戏中是否能够使用这个移动连接，以及使用后会发生什么。
     public sealed class MovementInfo : DBObject
     {
+        // 说明（给新手）：
+        // - 该类的属性都使用了 `OnChanged` 方法来触发属性更改事件，这样在编辑器中修改这些属性时，界面可以及时更新。
+        // - `SourceRegion` 和 `DestinationRegion` 是两个地图区域对象，表示移动连接的起点和终点。它们都被标记为 `[IsIdentity]
         [IsIdentity]
         public MapRegion SourceRegion
         {
@@ -36,6 +42,7 @@ namespace Library.SystemModels
         }
         private MapRegion _DestinationRegion;
 
+        // 图标属性，表示在地图上显示的图标类型（例如传送门、楼梯等）
         public MapIcon Icon
         {
             get { return _Icon; }
@@ -51,6 +58,7 @@ namespace Library.SystemModels
         }
         private MapIcon _Icon;
 
+        // 条件和效果属性，表示使用这个移动连接所需的条件（例如需要的物品、需要的刷新点、需要的洞穴、需要的副本等）以及使用后会产生的效果
         public ItemInfo NeedItem
         {
             get { return _NeedItem; }
@@ -66,6 +74,7 @@ namespace Library.SystemModels
         }
         private ItemInfo _NeedItem;
 
+        // - `NeedSpawn` 属性表示使用这个移动连接所需的刷新点（RespawnInfo）。如果玩家想要使用这个连接，必须在地图上有一个满足条件的刷新点。
         public RespawnInfo NeedSpawn
         {
             get { return _NeedSpawn; }
