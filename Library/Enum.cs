@@ -486,16 +486,16 @@ namespace Library
         Beckon = 112, //斗转星移
         Might = 113, //破血狂杀
         SwiftBlade = 114, //快刀斩马
-        Assault = 115,
+        Assault = 115, 
         Endurance = 116, //金刚之躯
         ReflectDamage = 117, //移花接木
         Fetter = 118, //泰山压顶
-        SwirlingBlade = 119,
+        SwirlingBlade = 119, //旋风斩
         ReigningStep = 120, //君临步
         MaelstromBlade = 121, //屠龙斩
-        AdvancedPotionMastery = 122,
-        MassBeckon = 123,
-        SeismicSlam = 124,
+        AdvancedPotionMastery = 122,//高级运气术
+        MassBeckon = 123,//嘲讽
+        SeismicSlam = 124,//天雷锤
 
         FireBall = 201, //火球术
         LightningBall = 202, //霹雳掌
