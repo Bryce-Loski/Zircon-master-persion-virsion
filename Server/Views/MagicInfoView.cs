@@ -1,6 +1,7 @@
 ﻿using DevExpress.XtraBars;
 using Library;
 using Library.SystemModels;
+using Server.Extensions;
 using System;
 
 namespace Server.Views
@@ -13,7 +14,7 @@ namespace Server.Views
 
             MagicInfoGridControl.DataSource = SMain.Session.GetCollection<MagicInfo>().Binding;
 
-            MagicImageComboBox.Items.AddEnum<MagicType>();
+            MagicImageComboBox.Items.AddEnumWithChineseName<MagicType>();
             SchoolImageComboBox.Items.AddEnum<MagicSchool>();
             PropertyImageComboBox.Items.AddEnum<MagicProperty>();
             ClassImageComboBox.Items.AddEnum<MirClass>();
