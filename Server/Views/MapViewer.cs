@@ -86,6 +86,10 @@ namespace Server.Views
 
             Map.Selection = MapRegion.GetPoints(Map.Width);
 
+            // 默认启用显示功能，让用户能看到选择区域
+            Map.DrawSelection = true;
+            Map.DrawAttributes = false;
+            
             AttributesButton.Enabled = true;
             BlockedOnlyButton.Enabled = true;
             SelectionButton.Enabled = true;
@@ -349,17 +353,23 @@ namespace Server.Views
         {
             // 鼠标滚轮（在 DXPanel 上）：通常用来调整当前工具的半径（例如选择/刷子大小），不是缩放
             // 说明（新手）：缩放由 ZoomIn/ZoomOut/Reset 控件控制；鼠标滚轮在此处被用作半径调整。
+            if (Map == null) return;
+            
             Map.Radius = Math.Max(0, Map.Radius - e.Delta / SystemInformation.MouseWheelScrollDelta);
         }
         private void DXPanel_MouseDown(object sender, MouseEventArgs e)
         {
             // 鼠标按下事件转到 MapControl，MapControl 负责处理选择/绘制起始点等行为
+            if (Map == null) return;
+            
             Map.MouseDown(e);
         }
 
         private void DXPanel_MouseMove(object sender, MouseEventArgs e)
         {
             // 鼠标移动事件转到 MapControl，通常用于更新鼠标位置、显示悬浮信息或动态绘制选择
+            if (Map == null) return;
+            
             Map.MouseMove(e);
         }
 
@@ -371,12 +381,16 @@ namespace Server.Views
         private void DXPanel_MouseEnter(object sender, EventArgs e)
         {
             // 鼠标进入渲染面板：通知 MapControl 进入状态（例如显示光标）
+            if (Map == null) return;
+            
             Map.MouseEnter();
         }
 
         private void DXPanel_MouseLeave(object sender, EventArgs e)
         {
             // 鼠标离开渲染面板：通知 MapControl 退出状态（例如隐藏光标）
+            if (Map == null) return;
+            
             Map.MouseLeave();
         }
 

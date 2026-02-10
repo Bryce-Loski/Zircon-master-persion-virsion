@@ -496,6 +496,8 @@ namespace Client.Scenes.Views
         }
         private MagicInfo _Info;
         public event EventHandler<EventArgs> InfoChanged;
+
+        //技能信息改变时更新界面显示
         public void OnInfoChanged(MagicInfo oValue, MagicInfo nValue)
         {
             Image.Index = Info.Icon;

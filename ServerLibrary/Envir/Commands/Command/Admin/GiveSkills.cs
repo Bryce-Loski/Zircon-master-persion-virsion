@@ -10,16 +10,19 @@ namespace Server.Envir.Commands.Command.Admin
     class GiveSkills : AbstractParameterizedCommand<IAdminCommand>
     {
         public override string VALUE => "GIVESKILLS";
-        public override int PARAMS_LENGTH => 2;
+        public override int PARAMS_LENGTH => 1;
 
         public override void Action(PlayerObject player, string[] vals)
         {
             if (vals.Length < PARAMS_LENGTH)
                 ThrowNewInvalidParametersException();
 
-            player = SEnvir.GetPlayerByCharacter(vals[1]);
-            if (player == null)
-                throw new UserCommandException(string.Format("Could not find player: {0}", vals[1]));
+            if (vals.Length > 1)
+            {
+                player = SEnvir.GetPlayerByCharacter(vals[1]);
+                if (player == null)
+                    throw new UserCommandException(string.Format("Could not find player: {0}", vals[1]));
+            }
 
             UserMagic uMagic;
             foreach (MagicInfo mInfo in SEnvir.MagicInfoList.Binding)

@@ -42,7 +42,48 @@ namespace Server.Views
             // 在批量修改或重要更改前建议先备份数据库或在测试环境中运行该操作。
             SMain.Session.Save(true);
         }
+        private void DeleteRowButton_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // 事件：删除当前选中的 MapRegion 行
+            // 说明（新手）：
+            // - 先检查当前是否选中区域，如果没有会提示用户选择一行
+            // - 询问用户确认后，调用 `region.Delete()` 从数据库集合中删除对象
+            // - 删除后刷新视图。注意：删除操作在保存数据库后才会永久生效
+            GridView view = MapRegionGridControl.FocusedView as GridView;
+            if (view == null) return;
 
+            MapRegion region = view.GetFocusedRow() as MapRegion;
+            if (region == null)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "请选择要删除的区域！",
+                    "删除区域",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult result = System.Windows.Forms.MessageBox.Show(
+                $"确定要删除区域 '{region.Description}' 吗？\n\n" +
+                $"地图: {region.Map?.Description ?? "未知"}\n" +
+                $"大小: {region.Size} 格\n\n" +
+                $"此操作将在保存数据库后永久生效。",
+                "删除区域",
+                System.Windows.Forms.MessageBoxButtons.YesNo,
+                System.Windows.Forms.MessageBoxIcon.Warning);
+
+            if (result != System.Windows.Forms.DialogResult.Yes) return;
+
+            region.Delete();
+
+            view.RefreshData();
+
+            System.Windows.Forms.MessageBox.Show(
+                "区域已删除！\n\n请点击\"保存数据库\"按钮以永久保存更改。",
+                "删除成功",
+                System.Windows.Forms.MessageBoxButtons.OK,
+                System.Windows.Forms.MessageBoxIcon.Information);
+        }
         private void EditButtonEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
             // 事件：编辑按钮被点击（通常出现在某一列的按钮列中，用于在地图查看器中编辑/查看区域）。
@@ -57,6 +98,7 @@ namespace Server.Views
 
             MapViewer.CurrentViewer.BringToFront();
 
+            // 获取当前 GridView 的焦点行（即当前选中的 MapRegion 对象）。
             GridView view = MapRegionGridControl.FocusedView as GridView;
 
             if (view == null) return;
@@ -81,6 +123,160 @@ namespace Server.Views
             // 说明（新手）：`JsonExporter.Export<T>(GridView)` 会基于提供的 GridView 导出其当前展示的数据并弹出保存对话框。
             // 导出的 JSON 可被 `JsonImporter` 重新导入到另一个实例或用于备份。
             JsonExporter.Export<MapRegion>(MapRegionGridView);
+        }
+
+        private void MapRegionGridView_DoubleClick(object sender, EventArgs e)
+        {
+            // 事件：双击表格行时显示区域详细信息
+            // 说明（新手）：双击区域时会弹出对话框显示该区域的边界坐标、尺寸等详细信息
+            GridView view = MapRegionGridControl.FocusedView as GridView;
+            if (view == null) return;
+
+            MapRegion region = view.GetFocusedRow() as MapRegion;
+            if (region == null) return;
+
+            string info = GetRegionBoundsInfo(region);
+            System.Windows.Forms.MessageBox.Show(
+                info,
+                $"区域信息 - {region.Description}",
+                System.Windows.Forms.MessageBoxButtons.OK,
+                System.Windows.Forms.MessageBoxIcon.Information);
+        }
+
+        private void GenerateRegionButton_Click(object sender, EventArgs e)
+        {
+            // 事件：点击"生成区域"按钮，根据坐标自动创建矩形选择区域
+            // 说明（新手）：输入左上角和右下角坐标后，会自动在 MapViewer 中填充该矩形区域
+            
+            GridView view = MapRegionGridControl.FocusedView as GridView;
+            if (view == null) return;
+
+            MapRegion region = view.GetFocusedRow() as MapRegion;
+            if (region == null || region.Map == null)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "请先选择一个区域并设置地图！",
+                    "错误",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 解析坐标输入
+            if (!int.TryParse(TopLeftXTextEdit.Text, out int x1) ||
+                !int.TryParse(TopLeftYTextEdit.Text, out int y1) ||
+                !int.TryParse(BottomRightXTextEdit.Text, out int x2) ||
+                !int.TryParse(BottomRightYTextEdit.Text, out int y2))
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "请输入有效的数字坐标！",
+                    "错误",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 确保坐标顺序正确（左上到右下）
+            int minX = Math.Min(x1, x2);
+            int maxX = Math.Max(x1, x2);
+            int minY = Math.Min(y1, y2);
+            int maxY = Math.Max(y1, y2);
+
+            // 验证坐标范围
+            if (minX < 0 || minY < 0 || maxX >= region.Map.Width || maxY >= region.Map.Height)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    $"坐标超出地图范围！\n地图大小: {region.Map.Width} x {region.Map.Height}",
+                    "错误",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 打开 MapViewer 并设置区域
+            if (MapViewer.CurrentViewer == null)
+            {
+                MapViewer.CurrentViewer = new MapViewer();
+                MapViewer.CurrentViewer.Show();
+            }
+
+            MapViewer.CurrentViewer.BringToFront();
+            MapViewer.CurrentViewer.Save();
+            MapViewer.CurrentViewer.MapRegion = region;
+
+            // 生成矩形区域选择
+            var selection = new System.Collections.Generic.HashSet<System.Drawing.Point>();
+            for (int x = minX; x <= maxX; x++)
+            {
+                for (int y = minY; y <= maxY; y++)
+                {
+                    selection.Add(new System.Drawing.Point(x, y));
+                }
+            }
+
+            MapViewer.CurrentViewer.Map.Selection = selection;
+            MapViewer.CurrentViewer.Map.TextureValid = false;
+
+            // 自动保存
+            MapViewer.CurrentViewer.Save();
+
+            System.Windows.Forms.MessageBox.Show(
+                $"已生成区域！\n" +
+                $"起始坐标: ({minX}, {minY})\n" +
+                $"结束坐标: ({maxX}, {maxY})\n" +
+                $"区域大小: {selection.Count} 格",
+                "成功",
+                System.Windows.Forms.MessageBoxButtons.OK,
+                System.Windows.Forms.MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// 获取 MapRegion 的边界范围（最小和最大坐标）
+        /// </summary>
+        /// <param name="region">要分析的地图区域</param>
+        /// <returns>返回边界信息，如果区域为空则返回 null</returns>
+        private string GetRegionBoundsInfo(MapRegion region)
+        {
+            if (region == null || region.Map == null || region.Size == 0)
+                return "区域为空";
+
+            // 获取区域内所有格子的坐标
+            var points = region.GetPoints(region.Map.Width);
+
+            if (points.Count == 0)
+                return "区域为空";
+
+            // 计算边界
+            int minX = int.MaxValue;
+            int minY = int.MaxValue;
+            int maxX = int.MinValue;
+            int maxY = int.MinValue;
+
+            foreach (var point in points)
+            {
+                if (point.X < minX) minX = point.X;
+                if (point.Y < minY) minY = point.Y;
+                if (point.X > maxX) maxX = point.X;
+                if (point.Y > maxY) maxY = point.Y;
+            }
+
+            // 计算矩形尺寸
+            int width = maxX - minX + 1;
+            int height = maxY - minY + 1;
+            int rectangleArea = width * height;
+
+            // 计算填充率（实际选中格子 / 矩形面积）
+            double fillRate = (double)region.Size / rectangleArea * 100;
+
+            return string.Format(
+                "起始坐标: ({0}, {1})\n" +
+                "结束坐标: ({2}, {3})\n" +
+                "矩形尺寸: {4} x {5} ({6} 格)\n" +
+                "实际大小: {7} 格\n" +
+                "填充率: {8:F1}%",
+                minX, minY, maxX, maxY,
+                width, height, rectangleArea,
+                region.Size, fillRate);
         }
     }
 }

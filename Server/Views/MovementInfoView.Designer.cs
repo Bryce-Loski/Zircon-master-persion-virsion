@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MovementInfoView));
             ribbon = new DevExpress.XtraBars.Ribbon.RibbonControl();
             SaveButton = new DevExpress.XtraBars.BarButtonItem();
+            DeleteRowButton = new DevExpress.XtraBars.BarButtonItem();
             ImportButton = new DevExpress.XtraBars.BarButtonItem();
             ExportButton = new DevExpress.XtraBars.BarButtonItem();
             ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
@@ -66,9 +67,9 @@
             // ribbon
             // 
             ribbon.ExpandCollapseItem.Id = 0;
-            ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbon.ExpandCollapseItem, ribbon.SearchEditItem, SaveButton, ImportButton, ExportButton });
+            ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbon.ExpandCollapseItem, ribbon.SearchEditItem, SaveButton, DeleteRowButton, ImportButton, ExportButton });
             ribbon.Location = new System.Drawing.Point(0, 0);
-            ribbon.MaxItemId = 4;
+            ribbon.MaxItemId = 5;
             ribbon.Name = "ribbon";
             ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] { ribbonPage1 });
             ribbon.Size = new System.Drawing.Size(663, 144);
@@ -81,24 +82,35 @@
             SaveButton.ImageOptions.LargeImage = (System.Drawing.Image)resources.GetObject("SaveButton.ImageOptions.LargeImage");
             SaveButton.LargeWidth = 60;
             SaveButton.Name = "SaveButton";
+            SaveButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             SaveButton.ItemClick += SaveButton_ItemClick;
+            // 
+            // DeleteRowButton
+            // 
+            DeleteRowButton.Caption = "删除行";
+            DeleteRowButton.Id = 2;
+            DeleteRowButton.Name = "DeleteRowButton";
+            DeleteRowButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
+            DeleteRowButton.ItemClick += DeleteRowButton_ItemClick;
             // 
             // ImportButton
             // 
             ImportButton.Caption = "导入";
-            ImportButton.Id = 2;
+            ImportButton.Id = 3;
             ImportButton.ImageOptions.Image = (System.Drawing.Image)resources.GetObject("ImportButton.ImageOptions.Image");
             ImportButton.ImageOptions.LargeImage = (System.Drawing.Image)resources.GetObject("ImportButton.ImageOptions.LargeImage");
             ImportButton.Name = "ImportButton";
+            ImportButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             ImportButton.ItemClick += ImportButton_ItemClick;
             // 
             // ExportButton
             // 
             ExportButton.Caption = "导出";
-            ExportButton.Id = 3;
+            ExportButton.Id = 4;
             ExportButton.ImageOptions.Image = (System.Drawing.Image)resources.GetObject("ExportButton.ImageOptions.Image");
             ExportButton.ImageOptions.LargeImage = (System.Drawing.Image)resources.GetObject("ExportButton.ImageOptions.LargeImage");
             ExportButton.Name = "ExportButton";
+            ExportButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             ExportButton.ItemClick += ExportButton_ItemClick;
             // 
             // ribbonPage1
@@ -112,8 +124,9 @@
             ribbonPageGroup1.AllowTextClipping = false;
             ribbonPageGroup1.CaptionButtonVisible = DevExpress.Utils.DefaultBoolean.False;
             ribbonPageGroup1.ItemLinks.Add(SaveButton);
+            ribbonPageGroup1.ItemLinks.Add(DeleteRowButton);
             ribbonPageGroup1.Name = "ribbonPageGroup1";
-            ribbonPageGroup1.Text = "保存";
+            ribbonPageGroup1.Text = "数据操作";
             // 
             // JsonImportExport
             // 
@@ -186,6 +199,7 @@
             // 地图上显示的图标
             // 
             gridColumn3.Caption = "图标";
+            gridColumn3.ColumnEdit = MapIconImageComboBox;
             gridColumn3.FieldName = "Icon";
             gridColumn3.Name = "gridColumn3";
             gridColumn3.Visible = true;
@@ -341,6 +355,7 @@
         private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage1;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup1;
         private DevExpress.XtraBars.BarButtonItem SaveButton;
+        private DevExpress.XtraBars.BarButtonItem DeleteRowButton;
         private DevExpress.XtraGrid.GridControl MovementGridControl;
         private DevExpress.XtraGrid.Views.Grid.GridView MovementGridView;
         private DevExpress.XtraEditors.Repository.RepositoryItemLookUpEdit MapLookUpEdit;
