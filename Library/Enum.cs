@@ -494,7 +494,7 @@ namespace Library
         ReigningStep = 120, //君临步
         MaelstromBlade = 121, //屠龙斩
         AdvancedPotionMastery = 122,//高级运气术
-        MassBeckon = 123,//嘲讽
+        MassBeckon = 123,//挑衅
         SeismicSlam = 124,//天雷锤
 
         FireBall = 201, //火球术
@@ -534,8 +534,8 @@ namespace Library
         FuryBlast = 235,
         TempestOfUnstableEnergy = 236, //地狱魔焰
         MirrorImage = 237, //分身术
-        AdvancedRenounce = 238,
-        FrostBite = 239,
+        AdvancedRenounce = 238,//魔光盾
+        FrostBite = 239,//冰雨
         Asteroid = 240,
 
         Heal = 300, //治愈术

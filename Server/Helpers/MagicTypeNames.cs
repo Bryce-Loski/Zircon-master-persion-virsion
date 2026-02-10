@@ -32,8 +32,13 @@ namespace Server.Helpers
             { MagicType.Endurance, "金刚之躯" },
             { MagicType.ReflectDamage, "移花接木" },
             { MagicType.Fetter, "泰山压顶" },
+            { MagicType.SwirlingBlade, "旋风斩" },
             { MagicType.ReigningStep, "君临步" },
             { MagicType.MaelstromBlade, "屠龙斩" },
+            { MagicType.AdvancedPotionMastery, "高级运气术" },
+            { MagicType.MassBeckon, "挑衅" },
+            { MagicType.SeismicSlam, "天雷锤" },
+
 
             // 法师技能
             { MagicType.FireBall, "火球术" },
@@ -68,6 +73,9 @@ namespace Server.Helpers
             { MagicType.ThunderStrike, "电闪雷鸣" },
             { MagicType.TempestOfUnstableEnergy, "地狱魔焰" },
             { MagicType.MirrorImage, "分身术" },
+            { MagicType.AdvancedRenounce, "魔光盾" },
+            { MagicType.FrostBite, "冰雨" },
+            
 
             // 道士技能
             { MagicType.Heal, "治愈术" },
