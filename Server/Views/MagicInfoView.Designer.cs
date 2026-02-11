@@ -33,6 +33,8 @@
             SaveButton = new DevExpress.XtraBars.BarButtonItem();
             ImportButton = new DevExpress.XtraBars.BarButtonItem();
             ExportButton = new DevExpress.XtraBars.BarButtonItem();
+            InsertRowButton = new DevExpress.XtraBars.BarButtonItem();
+            DeleteRowButton = new DevExpress.XtraBars.BarButtonItem();
             ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             JsonImportExport = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
@@ -75,9 +77,9 @@
             // ribbon
             // 
             ribbon.ExpandCollapseItem.Id = 0;
-            ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbon.ExpandCollapseItem, ribbon.SearchEditItem, SaveButton, ImportButton, ExportButton });
+            ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbon.ExpandCollapseItem, ribbon.SearchEditItem, SaveButton, ImportButton, ExportButton, InsertRowButton, DeleteRowButton });
             ribbon.Location = new System.Drawing.Point(0, 0);
-            ribbon.MaxItemId = 4;
+            ribbon.MaxItemId = 6;
             ribbon.Name = "ribbon";
             ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] { ribbonPage1 });
             ribbon.Size = new System.Drawing.Size(896, 144);
@@ -90,6 +92,7 @@
             SaveButton.ImageOptions.LargeImage = (System.Drawing.Image)resources.GetObject("SaveButton.ImageOptions.LargeImage");
             SaveButton.LargeWidth = 60;
             SaveButton.Name = "SaveButton";
+            SaveButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             SaveButton.ItemClick += SaveButton_ItemClick;
             // 
             // ImportButton
@@ -99,6 +102,7 @@
             ImportButton.ImageOptions.Image = (System.Drawing.Image)resources.GetObject("ImportButton.ImageOptions.Image");
             ImportButton.ImageOptions.LargeImage = (System.Drawing.Image)resources.GetObject("ImportButton.ImageOptions.LargeImage");
             ImportButton.Name = "ImportButton";
+            ImportButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             ImportButton.ItemClick += ImportButton_ItemClick;
             // 
             // ExportButton
@@ -108,7 +112,24 @@
             ExportButton.ImageOptions.Image = (System.Drawing.Image)resources.GetObject("ExportButton.ImageOptions.Image");
             ExportButton.ImageOptions.LargeImage = (System.Drawing.Image)resources.GetObject("ExportButton.ImageOptions.LargeImage");
             ExportButton.Name = "ExportButton";
+            ExportButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             ExportButton.ItemClick += ExportButton_ItemClick;
+            // 
+            // InsertRowButton
+            // 
+            InsertRowButton.Caption = "插入行";
+            InsertRowButton.Id = 4;
+            InsertRowButton.Name = "InsertRowButton";
+            InsertRowButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
+            InsertRowButton.ItemClick += InsertRowButton_ItemClick;
+            // 
+            // DeleteRowButton
+            // 
+            DeleteRowButton.Caption = "删除行";
+            DeleteRowButton.Id = 5;
+            DeleteRowButton.Name = "DeleteRowButton";
+            DeleteRowButton.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
+            DeleteRowButton.ItemClick += DeleteRowButton_ItemClick;
             // 
             // ribbonPage1
             // 
@@ -121,8 +142,10 @@
             ribbonPageGroup1.AllowTextClipping = false;
             ribbonPageGroup1.CaptionButtonVisible = DevExpress.Utils.DefaultBoolean.False;
             ribbonPageGroup1.ItemLinks.Add(SaveButton);
+            ribbonPageGroup1.ItemLinks.Add(InsertRowButton);
+            ribbonPageGroup1.ItemLinks.Add(DeleteRowButton);
             ribbonPageGroup1.Name = "ribbonPageGroup1";
-            ribbonPageGroup1.Text = "保存";
+            ribbonPageGroup1.Text = "数据操作";
             // 
             // JsonImportExport
             // 
@@ -378,6 +401,8 @@
         private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage1;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup1;
         private DevExpress.XtraBars.BarButtonItem SaveButton;
+        private DevExpress.XtraBars.BarButtonItem InsertRowButton;
+        private DevExpress.XtraBars.BarButtonItem DeleteRowButton;
         private DevExpress.XtraEditors.Repository.RepositoryItemImageComboBox MagicImageComboBox;
         private DevExpress.XtraEditors.Repository.RepositoryItemImageComboBox SchoolImageComboBox;
         private DevExpress.XtraEditors.Repository.RepositoryItemImageComboBox ClassImageComboBox;

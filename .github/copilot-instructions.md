@@ -1,6 +1,7 @@
 **Repo Context**
 - **Purpose:** 管理和运行 Legend of Mir 3 — 包含 Server、Client、Launcher、Patcher、插件与编辑器工具。
 - **Entry point (solution):** `Zircon Server.sln` (多个 WinForms 和库项目)
+- **Scope for code changes:** 后续代码修改仅限 `Zircon Server.sln` 包含的目录：`Launcher/`, `PatchManager/`, `Client/`, `Server/`, `ImageManager/`, `Patcher/`, `ServerCore/`, `ServerLibrary/`, `LibraryCore/`, `PluginCore/`, `PluginStandalone/`, `LibraryEditor/`。
 
 **Big Picture / Architecture**
 - **Main apps:** `Server/` (服务器控制台/管理 WinForms), `Client/` (客户端 WinForms), `Launcher/`, `Patcher/`, `ImageManager/`.
