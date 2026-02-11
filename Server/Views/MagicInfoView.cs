@@ -14,7 +14,7 @@ namespace Server.Views
 
             MagicInfoGridControl.DataSource = SMain.Session.GetCollection<MagicInfo>().Binding;
 
-            MagicImageComboBox.Items.AddEnumWithChineseName<MagicType>();
+            //MagicImageComboBox.Items.AddEnumWithChineseName<MagicType>();
             PropertyImageComboBox.Items.AddEnum<MagicProperty>();
 
             // 手动添加职业枚举（中文描述 - 传奇3民间常用说法）

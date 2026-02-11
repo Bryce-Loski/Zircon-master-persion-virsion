@@ -63,16 +63,16 @@ namespace Server.Views
                 return;
             }
 
-            DialogResult result = System.Windows.Forms.MessageBox.Show(
-                $"确定要删除区域 '{region.Description}' 吗？\n\n" +
-                $"地图: {region.Map?.Description ?? "未知"}\n" +
-                $"大小: {region.Size} 格\n\n" +
-                $"此操作将在保存数据库后永久生效。",
-                "删除区域",
-                System.Windows.Forms.MessageBoxButtons.YesNo,
-                System.Windows.Forms.MessageBoxIcon.Warning);
+            //DialogResult result = System.Windows.Forms.MessageBox.Show(
+            //    $"确定要删除区域 '{region.Description}' 吗？\n\n" +
+            //    $"地图: {region.Map?.Description ?? "未知"}\n" +
+            //    $"大小: {region.Size} 格\n\n" +
+            //    $"此操作将在保存数据库后永久生效。",
+            //    "删除区域",
+            //    System.Windows.Forms.MessageBoxButtons.YesNo,
+            //    System.Windows.Forms.MessageBoxIcon.Warning);
 
-            if (result != System.Windows.Forms.DialogResult.Yes) return;
+            //if (result != System.Windows.Forms.DialogResult.Yes) return;
 
             region.Delete();
 
@@ -135,12 +135,12 @@ namespace Server.Views
             MapRegion region = view.GetFocusedRow() as MapRegion;
             if (region == null) return;
 
-            string info = GetRegionBoundsInfo(region);
-            System.Windows.Forms.MessageBox.Show(
-                info,
-                $"区域信息 - {region.Description}",
-                System.Windows.Forms.MessageBoxButtons.OK,
-                System.Windows.Forms.MessageBoxIcon.Information);
+            //string info = GetRegionBoundsInfo(region);
+            //System.Windows.Forms.MessageBox.Show(
+            //    info,
+            //    $"区域信息 - {region.Description}",
+            //    System.Windows.Forms.MessageBoxButtons.OK,
+            //    System.Windows.Forms.MessageBoxIcon.Information);
         }
 
         private void GenerateRegionButton_Click(object sender, EventArgs e)
@@ -182,16 +182,16 @@ namespace Server.Views
             int minY = Math.Min(y1, y2);
             int maxY = Math.Max(y1, y2);
 
-            // 验证坐标范围
-            if (minX < 0 || minY < 0 || maxX >= region.Map.Width || maxY >= region.Map.Height)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                    $"坐标超出地图范围！\n地图大小: {region.Map.Width} x {region.Map.Height}",
-                    "错误",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Warning);
-                return;
-            }
+            //// 验证坐标范围
+            //if (minX < 0 || minY < 0 || maxX >= region.Map.Width || maxY >= region.Map.Height)
+            //{
+            //    System.Windows.Forms.MessageBox.Show(
+            //        $"坐标超出地图范围！\n地图大小: {region.Map.Width} x {region.Map.Height}",
+            //        "错误",
+            //        System.Windows.Forms.MessageBoxButtons.OK,
+            //        System.Windows.Forms.MessageBoxIcon.Warning);
+            //    return;
+            //}
 
             // 打开 MapViewer 并设置区域
             if (MapViewer.CurrentViewer == null)
@@ -235,48 +235,48 @@ namespace Server.Views
         /// </summary>
         /// <param name="region">要分析的地图区域</param>
         /// <returns>返回边界信息，如果区域为空则返回 null</returns>
-        private string GetRegionBoundsInfo(MapRegion region)
-        {
-            if (region == null || region.Map == null || region.Size == 0)
-                return "区域为空";
+        //private string GetRegionBoundsInfo(MapRegion region)
+        //{
+        //    if (region == null || region.Map == null || region.Size == 0)
+        //        return "区域为空";
 
-            // 获取区域内所有格子的坐标
-            var points = region.GetPoints(region.Map.Width);
+        //    // 获取区域内所有格子的坐标
+        //    var points = region.GetPoints(region.Map.Width);
 
-            if (points.Count == 0)
-                return "区域为空";
+        //    if (points.Count == 0)
+        //        return "区域为空";
 
-            // 计算边界
-            int minX = int.MaxValue;
-            int minY = int.MaxValue;
-            int maxX = int.MinValue;
-            int maxY = int.MinValue;
+        //    // 计算边界
+        //    int minX = int.MaxValue;
+        //    int minY = int.MaxValue;
+        //    int maxX = int.MinValue;
+        //    int maxY = int.MinValue;
 
-            foreach (var point in points)
-            {
-                if (point.X < minX) minX = point.X;
-                if (point.Y < minY) minY = point.Y;
-                if (point.X > maxX) maxX = point.X;
-                if (point.Y > maxY) maxY = point.Y;
-            }
+        //    foreach (var point in points)
+        //    {
+        //        if (point.X < minX) minX = point.X;
+        //        if (point.Y < minY) minY = point.Y;
+        //        if (point.X > maxX) maxX = point.X;
+        //        if (point.Y > maxY) maxY = point.Y;
+        //    }
 
-            // 计算矩形尺寸
-            int width = maxX - minX + 1;
-            int height = maxY - minY + 1;
-            int rectangleArea = width * height;
+        //    // 计算矩形尺寸
+        //    int width = maxX - minX + 1;
+        //    int height = maxY - minY + 1;
+        //    int rectangleArea = width * height;
 
-            // 计算填充率（实际选中格子 / 矩形面积）
-            double fillRate = (double)region.Size / rectangleArea * 100;
+        //    // 计算填充率（实际选中格子 / 矩形面积）
+        //    double fillRate = (double)region.Size / rectangleArea * 100;
 
-            return string.Format(
-                "起始坐标: ({0}, {1})\n" +
-                "结束坐标: ({2}, {3})\n" +
-                "矩形尺寸: {4} x {5} ({6} 格)\n" +
-                "实际大小: {7} 格\n" +
-                "填充率: {8:F1}%",
-                minX, minY, maxX, maxY,
-                width, height, rectangleArea,
-                region.Size, fillRate);
-        }
+        //    return string.Format(
+        //        "起始坐标: ({0}, {1})\n" +
+        //        "结束坐标: ({2}, {3})\n" +
+        //        "矩形尺寸: {4} x {5} ({6} 格)\n" +
+        //        "实际大小: {7} 格\n" +
+        //        "填充率: {8:F1}%",
+        //        minX, minY, maxX, maxY,
+        //        width, height, rectangleArea,
+        //        region.Size, fillRate);
+        //}
     }
 }
